@@ -86,7 +86,7 @@ for line in log_file:
         else:
             #error (or other?)
             icon_colour = 'red'
-            no_gps_radius = 1000
+            no_gps_radius = 200
 
         if ( gps_point.confidence == 'low' or gps_point.confidence == 'error'):
             if (int(gps_point.lat) == 0 or int(gps_point.lon) == 0):
