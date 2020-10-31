@@ -6,7 +6,7 @@ import random
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "asdo.log"
+log_file_name = "asdo.log.10"
 # log_file_name = filedialog.askopenfilename()
 # if not log_file_name:
 #     print("Error: must select an asdo.log file")
@@ -27,23 +27,23 @@ gps_map = folium.Map(location=[51.648611, -0.052778], zoom_start=10)
 import re
 log_file = open(log_file_name, 'r')
 for line in log_file:
+    RADIUS = 10000
+    circle_colours = ['#00ae53', '#86dc76', '#daf8aa', '#ffe6a4', '#ff9a61', '#ee0028']
+    icon_colours = ['darkpurple', 'lightred', 'gray', 'black', 'blue', 'orange', 'beige',
+                    'cadetblue', 'darkred', 'red', 'lightblue', 'white', 'purple',
+                    'lightgreen', 'darkblue', 'lightgray', 'darkgreen', 'green', 'pink']
+
     # Regex for the DataFrame columns
 
     # 2020/10/28 16:01:52.270464120 NavMan: 420.Car-A is DISCONNECTED at ( GPS+Odo, 52.4192, 0.745005, 0, 0.141 )
 
-    gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
-    # gps_line_re = re.compile(".*Publishing NavigationMessage.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
-
+    # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
+    gps_line_re = re.compile(".*Publishing NavigationMessage\((?P<lat>[^,]+),(?P<lon>[^,]+),(?P<gpsSpeed>[^,]+),(?P<confidence>.*?)")
     match = gps_line_re.search(line)
     if match:
         gps_d = match.groupdict()
         print (gps_d)
-
-        RADIUS = 10000
-        circle_colours = ['#00ae53', '#86dc76', '#daf8aa', '#ffe6a4', '#ff9a61', '#ee0028']
-        icon_colours = ['darkpurple', 'lightred', 'gray', 'black', 'blue', 'orange', 'beige',
-                        'cadetblue', 'darkred', 'red', 'lightblue', 'white', 'purple',
-                        'lightgreen', 'darkblue', 'lightgray', 'darkgreen', 'green', 'pink']
+        continue
 
         # Add markers to the map
         lat = gps_d["lat"]
