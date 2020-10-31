@@ -86,16 +86,16 @@ for line in log_file:
         else:
             #error (or other?)
             icon_colour = 'red'
-            no_gps_radius = 200
+            no_gps_radius = 1000
 
         if ( gps_point.confidence == 'low' or gps_point.confidence == 'error'):
-            if (gps_point.lat == 0 or gps_point.lon == 0):
+            if (int(gps_point.lat) == 0 or int(gps_point.lon) == 0):
                 lat = gps_previous.lat
                 lon = gps_previous.lon
+                draw_marker = False
             else:
                 lat = gps_point.lat
                 lon = gps_point.lon
-                draw_marker = True
 
             folium.Circle([lat, lon],
                           radius=no_gps_radius,
@@ -107,11 +107,11 @@ for line in log_file:
         if draw_marker:
             folium.Marker(location=[gps_point.lat, gps_point.lon],
                           popup = gps_d,
-                          icon=folium.Icon(icon_colour, icon='cloud')).\
+                          icon=folium.Icon(icon_colour)).\
                 add_to(gps_map)
 
-        # save current to previous
-        gps_previous = copy.deepcopy(gps_point)
+            # save current to previous
+            gps_previous = copy.deepcopy(gps_point)
 
 map_file = log_file_name + ".map.html"
 print("Writing to file {}".format(map_file))
