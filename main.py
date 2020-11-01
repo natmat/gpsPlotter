@@ -39,11 +39,15 @@ for line in log_file:
     # Regex for gps data
     # 2020/10/29 07:25:46.890862914 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 52.6252, 1.30934, 700, HIGH, 0.033 )
     # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
-    gps_line_re = re.compile(".*Publishing NavigationMessage\((?P<lat>[^,]+),(?P<lon>[^,]+),(?P<dist>[^,]+),"
-                             "(?P<confidence>.*?)\s+(?P<gpsSpeed>[^,]+).*")
+    gps_line_re = re.compile(".*Publishing NavigationMessage\("
+                             "(?P<lat>[^,]+),\s*(?P<lon>[^,]+),\s*(?P<dist>\d+),\s*"
+                             "(?P<confidence>[^,]+),\s*"
+                             "(?P<gpsSpeed>\d+\.\d+)"
+                             ".*")
     match = gps_line_re.search(line)
     if match:
         gps_d = match.groupdict()
+        # print(gps_d)
 
         # Add markers to the map
         gps_point.confidence = gps_d["confidence"].lower().strip()
@@ -55,12 +59,14 @@ for line in log_file:
         # ignore if no change in conf
         if (gps_point.confidence == 'high' and gps_point.confidence == gps_previous.confidence):
             gps_previous = copy.deepcopy(gps_point)
-            if not i_repeat % 50:
-                print(gps_d)
+            if not i_repeat % 10:
+                # print(gps_d)
+                speed = float(gps_point.gpsSpeed)/10
+                print(speed)
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
                                     popup = gps_d,
                                     color=icon_colour,
-                                    radius=200,#float(gps_point.gpsSpeed)*2,
+                                    radius=speed,
                                     fill=True).\
                     add_to(gps_map)
             i_repeat += 1
