@@ -32,14 +32,15 @@ icon_colours = ['darkpurple', 'lightred', 'gray', 'black', 'blue', 'orange', 'be
 
 
 
-gps_previous = gpsPoint.GpsPoint('', 0, 0, 0)
-gps_point = gpsPoint.GpsPoint('', 0, 0, 0)
+gps_previous = gpsPoint.GpsPoint('', 0, 0, 0, 0)
+gps_point = gpsPoint.GpsPoint('', 0, 0, 0, 0)
 
 for line in log_file:
     # Regex for gps data
+    # 2020/10/29 07:25:46.890862914 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 52.6252, 1.30934, 700, HIGH, 0.033 )
     # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
     gps_line_re = re.compile(".*Publishing NavigationMessage\((?P<lat>[^,]+),(?P<lon>[^,]+),(?P<dist>[^,]+),"
-                             "(?P<confidence>.*?),.*")
+                             "(?P<confidence>.*?)\s+(?P<gpsSpeed>[^,]+).*")
     match = gps_line_re.search(line)
     if match:
         gps_d = match.groupdict()
@@ -49,15 +50,17 @@ for line in log_file:
         gps_point.lat = gps_d["lat"]
         gps_point.lon = gps_d["lon"]
         gps_point.dist = gps_d["dist"]
+        gps_point.gpsSpeed = gps_d["gpsSpeed"]
 
         # ignore if no change in conf
         if (gps_point.confidence == 'high' and gps_point.confidence == gps_previous.confidence):
             gps_previous = copy.deepcopy(gps_point)
             if not i_repeat % 50:
+                print(gps_d)
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
                                     popup = gps_d,
                                     color=icon_colour,
-                                    radius=10,
+                                    radius=200,#float(gps_point.gpsSpeed)*2,
                                     fill=True).\
                     add_to(gps_map)
             i_repeat += 1
@@ -81,8 +84,6 @@ for line in log_file:
                              tooltip=str(low_radius)).\
                 add_to(gps_map)
         else:
-            print(gps_previous.lat, gps_previous.lon, gps_previous.confidence)
-            print(gps_d)
             #error (or other?)
             draw_marker = True
             icon_colour = 'red'
