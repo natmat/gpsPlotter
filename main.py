@@ -3,10 +3,12 @@ import tkinter as tk
 from tkinter import filedialog
 import copy
 
+import gpsPoint
+
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "tmp"
+log_file_name = "tmp.up"
 # log_file_name = filedialog.askopenfilename()
 # if not log_file_name:
 #     print("Error: must select an asdo.log file")
@@ -28,21 +30,10 @@ icon_colours = ['darkpurple', 'lightred', 'gray', 'black', 'blue', 'orange', 'be
                 'cadetblue', 'darkred', 'red', 'lightblue', 'white', 'purple',
                 'lightgreen', 'darkblue', 'lightgray', 'darkgreen', 'green', 'pink']
 
-class GpsPoint:
-  def __init__(self, confidence, lat, lon, dist):
-    self.confidence = [] if confidence is None else confidence
-    self.lat = [] if lat is None else lat
-    self.lon = [] if lon is None else lon
-    self.dist = [] if dist is None else dist
 
-    def __init__(self, d):
-        self.confidence = d["confidence"].lower().strip()
-        self.lat = d["lat"]
-        self.lon = d["lon"]
-        self.dist = d["dist"]
 
-gps_previous = GpsPoint('', 0, 0, 0)
-gps_point = GpsPoint('', 0, 0, 0)
+gps_previous = gpsPoint.GpsPoint('', 0, 0, 0)
+gps_point = gpsPoint.GpsPoint('', 0, 0, 0)
 
 for line in log_file:
     # Regex for gps data
@@ -52,7 +43,6 @@ for line in log_file:
     match = gps_line_re.search(line)
     if match:
         gps_d = match.groupdict()
-        print (gps_d)
 
         # Add markers to the map
         gps_point.confidence = gps_d["confidence"].lower().strip()
@@ -62,7 +52,8 @@ for line in log_file:
 
         # ignore if no change in conf
         if (gps_point.confidence == 'high' and gps_point.confidence == gps_previous.confidence):
-            if not i_repeat % 20:
+            gps_previous = copy.deepcopy(gps_point)
+            if not i_repeat % 50:
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
                                     popup = gps_d,
                                     color=icon_colour,
@@ -90,11 +81,17 @@ for line in log_file:
                              tooltip=str(low_radius)).\
                 add_to(gps_map)
         else:
+            print(gps_previous.lat, gps_previous.lon, gps_previous.confidence)
+            print(gps_d)
             #error (or other?)
-            draw_marker = False
+            draw_marker = True
             icon_colour = 'red'
+            # Copy previous lat/long, but retain confidence
+            confidence = gps_point.confidence
+            gps_point = copy.deepcopy(gps_previous)
+            gps_point.confidence = confidence
             folium.Circle([gps_point.lat, gps_point.lon],
-                          radius=200,
+                          radius=2000,
                           fill=False,
                           color=icon_colour,
                           tooltip=gps_d).\
