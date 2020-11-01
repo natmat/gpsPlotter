@@ -6,7 +6,7 @@ import copy
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "asdo.log"
+log_file_name = "tmp"
 # log_file_name = filedialog.askopenfilename()
 # if not log_file_name:
 #     print("Error: must select an asdo.log file")
@@ -33,40 +33,42 @@ icon_colours = ['darkpurple', 'lightred', 'gray', 'black', 'blue', 'orange', 'be
                 'lightgreen', 'darkblue', 'lightgray', 'darkgreen', 'green', 'pink']
 
 class GpsPoint:
-  def __init__(self, confidence, lat, lon):
+  def __init__(self, confidence, lat, lon, dist):
     self.confidence = [] if confidence is None else confidence
     self.lat = [] if lat is None else lat
     self.lon = [] if lon is None else lon
-
+    self.dist = [] if dist is None else dist
 
     def __init__(self, d):
         self.confidence = d["confidence"].lower().strip()
         self.lat = d["lat"]
         self.lon = d["lon"]
+        self.dist = d["dist"]
 
-
-gps_previous = GpsPoint('', 0, 0)
-gps_point = GpsPoint('', 0, 0)
+gps_previous = GpsPoint('', 0, 0, 0)
+gps_point = GpsPoint('', 0, 0, 0)
 
 for line in log_file:
     # Regex for gps data
     # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
-    gps_line_re = re.compile(".*Publishing NavigationMessage\((?P<lat>[^,]+),(?P<lon>[^,]+),(?P<travel>[^,]+),"
+    gps_line_re = re.compile(".*Publishing NavigationMessage\((?P<lat>[^,]+),(?P<lon>[^,]+),(?P<dist>[^,]+),"
                              "(?P<confidence>.*?),.*")
     match = gps_line_re.search(line)
     if match:
         gps_d = match.groupdict()
+        print (gps_d)
 
         # Add markers to the map
         gps_point.confidence = gps_d["confidence"].lower().strip()
         gps_point.lat = gps_d["lat"]
         gps_point.lon = gps_d["lon"]
+        gps_point.dist = gps_d["dist"]
 
         # ignore if no change in conf
         if (gps_point.confidence == 'high' and gps_point.confidence == gps_previous.confidence):
-            if not i_repeat % 50:
+            if not i_repeat % 20:
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
-                                    popup = gps_point.confidence,
+                                    popup = gps_d,
                                     color=icon_colour,
                                     radius=10,
                                     fill=True).\
@@ -81,27 +83,25 @@ for line in log_file:
         elif gps_point.confidence == 'medium':
             icon_colour = 'orange'
         elif gps_point.confidence == 'low':
-            icon_colour = 'pink'
-            no_gps_radius = 100
+            draw_marker = False
+            icon_colour = 'purple'
+            #Draw increase circles
+            low_radius = int(gps_point.dist) - int(gps_previous.dist)
+            folium.Circle([gps_previous.lat, gps_previous.lon],
+                             radius=low_radius,
+                             fill=False,
+                             color=icon_colour,
+                             tooltip=str(low_radius)).\
+                add_to(gps_map)
         else:
             #error (or other?)
+            draw_marker = False
             icon_colour = 'red'
-            no_gps_radius = 200
-
-        if ( gps_point.confidence == 'low' or gps_point.confidence == 'error'):
-            if (int(gps_point.lat) == 0 or int(gps_point.lon) == 0):
-                lat = gps_previous.lat
-                lon = gps_previous.lon
-                draw_marker = False
-            else:
-                lat = gps_point.lat
-                lon = gps_point.lon
-
-            folium.Circle([lat, lon],
-                          radius=no_gps_radius,
+            folium.Circle([gps_point.lat, gps_point.lon],
+                          radius=200,
                           fill=False,
                           color=icon_colour,
-                          tooltip=gps_point.confidence).\
+                          tooltip=gps_d).\
                 add_to(gps_map)
 
         if draw_marker:
