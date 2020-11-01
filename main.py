@@ -13,10 +13,6 @@ log_file_name = "tmp"
 #     exit(1)
 print("Reading data from {}".format(log_file_name))
 
-# Set up the DataFrame for the oolumns to extract from the station_data.sql waypoint table data
-import pandas as pd
-df = pd.DataFrame(columns=['waypoint_name', 'waypoint_type', 'waypoint_id', 'waypoint_lat', 'waypoint_long', 'waypoint_radius', 'tap_tsi_code'])
-
 # Create a basemap centred somewhere around East Anglia
 import folium
 # gps_map = folium.Map(location=[51.648611, -0.052778], zoom_start=10, tiles="CartoDB dark_matter")
