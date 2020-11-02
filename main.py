@@ -42,7 +42,7 @@ for line in log_file:
     gps_line_re = re.compile(".*Publishing NavigationMessage\("
                              "(?P<lat>[^,]+),\s*(?P<lon>[^,]+),\s*(?P<dist>\d+),\s*"
                              "(?P<confidence>[^,]+),\s*"
-                             "(?P<gpsSpeed>\d+\.\d+)"
+                             "(?P<gpsSpeed>[^\s]+)"
                              ".*")
     match = gps_line_re.search(line)
     if match:
@@ -90,6 +90,7 @@ for line in log_file:
                 add_to(gps_map)
         else:
             #error (or other?)
+            print(gps_d)
             draw_marker = True
             icon_colour = 'red'
             # Copy previous lat/long, but retain confidence
