@@ -8,7 +8,7 @@ import gpsPoint
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "tmp.up"
+log_file_name = "tmp.down"
 # log_file_name = filedialog.askopenfilename()
 # if not log_file_name:
 #     print("Error: must select an asdo.log file")
@@ -59,14 +59,13 @@ for line in log_file:
         # ignore if no change in conf
         if (gps_point.confidence == 'high' and gps_point.confidence == gps_previous.confidence):
             gps_previous = copy.deepcopy(gps_point)
-            if not i_repeat % 10:
+            if not i_repeat % 20:
                 # print(gps_d)
-                speed = float(gps_point.gpsSpeed)/10
-                print(speed)
+                speed_radius = float(gps_point.gpsSpeed)/10
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
                                     popup = gps_d,
                                     color=icon_colour,
-                                    radius=speed,
+                                    radius=speed_radius,
                                     fill=True).\
                     add_to(gps_map)
             i_repeat += 1
