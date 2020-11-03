@@ -32,7 +32,7 @@ gps_point = gpsPoint.GpsPoint('', 0, 0, 0, 0)
 ip_addr = "10.182.144.21"
 
 i_marker_count = 0
-i_map_count = 0
+i_map_count = 1
 i_line = 0
 for line in log_file:
     i_line += 1
@@ -144,23 +144,20 @@ for line in log_file:
             # save current to previous
             gps_previous = copy.deepcopy(gps_point)
 
-    file_write = False
     if i_marker_count > 500:
-        file_write = True
         i_marker_count = 0
-        i_map_count += 1
         map_file = log_file_name + "." + str(i_map_count) + ".map.html"
         print("Writing to file {}".format(map_file))
         gps_map.location = [gps_point.lat, gps_point.lon]
         gps_map.save(map_file)
         gps_map = folium.Map(location=[52.617, 1.3144], zoom_start=10)
+        i_map_count += 1
 
-if not file_write:
-    map_file = log_file_name + ".map.html"
-    print("Writing to file {}".format(map_file))
-    gps_map.location = [gps_point.lat, gps_point.lon]
-    gps_map.save(map_file)
-    gps_map = folium.Map(location=[52.617, 1.3144], zoom_start=10)
+map_file = log_file_name + "." + str(i_map_count) + ".map.html"
+print("Writing to file {}".format(map_file))
+gps_map.location = [gps_point.lat, gps_point.lon]
+gps_map.save(map_file)
+gps_map = folium.Map(location=[52.617, 1.3144], zoom_start=10)
 
 print("*** DONE ***")
 
