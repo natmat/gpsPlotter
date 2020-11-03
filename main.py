@@ -85,12 +85,13 @@ for line in log_file:
             if not i_repeat % 50:
                 # print(gps_d)
                 i_marker_count += 1
-                speed_radius = float(gps_point.gpsSpeed)/10
+                speed_radius = float(gps_point.gpsSpeed)/5
+                tool_tip = header.hours + ":" + header.minutes
                 folium.CircleMarker(location=[gps_point.lat, gps_point.lon],
                                     popup=gps_d,
                                     color=icon_colour,
                                     radius=speed_radius,
-                                    tooltip=header.hours+":"+header.minutes,
+                                    tooltip=tool_tip,
                                     fill=True).\
                     add_to(gps_map)
             i_repeat += 1
@@ -143,7 +144,9 @@ for line in log_file:
             # save current to previous
             gps_previous = copy.deepcopy(gps_point)
 
+    file_write = False
     if i_marker_count > 500:
+        file_write = True
         i_marker_count = 0
         i_map_count += 1
         map_file = log_file_name + "." + str(i_map_count) + ".map.html"
@@ -151,6 +154,13 @@ for line in log_file:
         gps_map.location = [gps_point.lat, gps_point.lon]
         gps_map.save(map_file)
         gps_map = folium.Map(location=[52.617, 1.3144], zoom_start=10)
+
+if not file_write:
+    map_file = log_file_name + ".map.html"
+    print("Writing to file {}".format(map_file))
+    gps_map.location = [gps_point.lat, gps_point.lon]
+    gps_map.save(map_file)
+    gps_map = folium.Map(location=[52.617, 1.3144], zoom_start=10)
 
 print("*** DONE ***")
 
