@@ -25,7 +25,7 @@ def main():
   line_without_header = ' '.join([str(elem) for elem in test_line.split()[5:]])
   print(line_header)
   print(line_without_header)
-  
+
   return(line_without_header)
 
 if __name__ == "__main__":
