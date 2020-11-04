@@ -4,7 +4,7 @@ from tkinter import filedialog
 import copy
 
 import gpsPoint
-import Header
+from Header import Header
 
 # Popup to select input station_data.sql file
 root = tk.Tk()
@@ -40,16 +40,11 @@ for line in log_file:
     if not line.find(ip_addr) != 1:
         continue
 
-    # Regex for gps data
-    # 2020/10/29 07:25:46.890862914 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 52.6252, 1.30934, 700, HIGH, 0.033 )
-    header_re = re.compile("^(?P<date>[\d]{4}\/[\d]{2}\/[\d]{2})\s+"
-                           "(?P<hours>[\d]{2}):(?P<minutes>[\d]{2}):(?P<seconds>[^,]+)\s+"
-                           "(?P<ip_addr>[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})\s+"
-                           "(?P<service>[\w]+)\s"
-                           ".*")
-    match = header_re.search(line)
-    if match:
-        header = Header.Header(match.groupdict())
+    header = Header()
+    line = header.stripHeader(line)
+
+    if header.service == 'Navigation':
+        Navigation.parseLine(line)
 
     # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
     gps_line_re = re.compile(".*Publishing NavigationMessage\("

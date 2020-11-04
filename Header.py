@@ -12,21 +12,19 @@ class Header():
     self.adeiv = split_line[3]
     self.service = split_line[4]
 
+    # Use list comprehension to remove the header from line
+    line_without_header = ' '.join([str(elem) for elem in line.split()[5:]])
+    return(line_without_header)
+
   def get_hours(self):
     return(self.hours)
 
 def main():
   test_line = " 2020/10/29 10:05:00.038423342 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 0, 0, 0, ERROR, 0 )"
   h = Header()
-  h.stripHeader(test_line)
-
-  #Use list comprehension to remove the header from line
-  line_header = ' '.join([str(elem) for elem in test_line.split()[:5]])
-  line_without_header = ' '.join([str(elem) for elem in test_line.split()[5:]])
-  print(line_header)
+  print(test_line)
+  line_without_header = h.stripHeader(test_line)
   print(line_without_header)
-
-  return(line_without_header)
 
 if __name__ == "__main__":
   # execute only if run as a script
