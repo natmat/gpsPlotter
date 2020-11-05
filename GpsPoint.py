@@ -1,4 +1,5 @@
-class GpsPoint:
+class GpsPoint():
+
   def __init__(self, confidence, lat, lon, dist, gpsSpeed):
     self.confidence = [] if confidence is None else confidence
     self.lat = [] if lat is None else lat

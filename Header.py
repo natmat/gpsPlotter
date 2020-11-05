@@ -22,7 +22,6 @@ class Header():
 def main():
   test_line = " 2020/10/29 10:05:00.038423342 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 0, 0, 0, ERROR, 0 )"
   h = Header()
-  print(test_line)
   line_without_header = h.stripHeader(test_line)
   print(line_without_header)
 
