@@ -4,12 +4,14 @@ import folium
 import copy
 
 class Navigation():
-    def __init__(self, gps_map, gps_previous):
+    i_repeat = 0
+    
+    def __init__(self, gps_map, gps_point, gps_previous):
         self.gps_map = gps_map
-        self.gps_point = None
+        self.gps_point = gps_point
         self.gps_previous = gps_previous
 
-    def parseLine(self, line, i_marker_count):
+    def parseLine(self, line, header, i_marker_count):
         # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
         line_re = re.compile(".*Publishing NavigationMessage\("
                                  "(?P<lat>[^,]+),\s*(?P<lon>[^,]+),\s*(?P<dist>\d+),\s*"
@@ -28,35 +30,35 @@ class Navigation():
                                       gps_d["gpsSpeed"])
 
             # Are we now in low speed (<1kph)?
-            if (float(self.gps_point.dist) < 1.0 and float(self.gps_previous.dist) >= 1.0):
+            if ((self.gps_point.confidence != "low" and self.gps_point.confidence != "error") and
+                (float(self.gps_point.dist) < 1.0 and float(self.gps_previous.dist) >= 1.0)):
                 i_marker_count[0] += 1
-                folium.Circle([self.gps_point.lat, self.gps_point.lon],
+                folium.Circle([self.gps_previous.lat, self.gps_previous.lon],
                               radius=200,
                               fill=False,
                               color='blue',
                               tooltip=gps_d).\
-                    add_to(gps_map)
+                    add_to(self.gps_map)
                 return
 
-            # If were HIGH ocnf and stil HIGH, then only map every N samples
+            # If was HIGH conf and still HIGH, then only map every N samples
             if (self.gps_point.confidence == 'high' and self.gps_point.confidence == self.gps_previous.confidence):
-                gps_previous = copy.deepcopy(self.gps_point)
-                if not i_repeat % 50:
+                self.gps_previous = copy.deepcopy(self.gps_point)
+                if not Navigation.i_repeat % 50:
                     i_marker_count[0] += 1
                     speed_radius = float(self.gps_point.gpsSpeed)/5
                     tool_tip = header.hours + ":" + header.minutes
                     folium.CircleMarker(location=[self.gps_point.lat, self.gps_point.lon],
                                         popup=gps_d,
-                                        color=icon_colour,
+                                        color='green',
                                         radius=speed_radius,
                                         tooltip=tool_tip,
-                                        fill=True).\
-                        add_to(gps_map)
-                i_repeat += 1
+                                        fill=True).add_to(self.gps_map)
+                Navigation.i_repeat += 1
                 return
 
             # Will not update map for conf levels.
-            i_repeat = 0
+            Navigation.i_repeat = 0
             draw_marker = True
             if self.gps_point.confidence == 'high':
                 icon_colour = 'green'
@@ -95,6 +97,7 @@ class Navigation():
                     add_to(self.gps_map)
 
             if draw_marker:
+                # print('draw_marker:', self.gps_point.lat, self.gps_point.lon)
                 i_marker_count[0] += 1
                 folium.Marker(location=[self.gps_point.lat, self.gps_point.lon],
                               popup=gps_d,
@@ -102,4 +105,5 @@ class Navigation():
                     add_to(self.gps_map)
 
                 # save current to previous
-                gps_previous = copy.deepcopy(self.gps_point)
+                self.gps_previous = copy.deepcopy(self.gps_point)
+

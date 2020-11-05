@@ -4,6 +4,7 @@ class Header():
     self.header = None
 
   def stripHeader(self, line):
+    # print(line)
     split_line = line.split()
     self.date = split_line[0]
     self.hours = split_line[1].split(":")[0]
