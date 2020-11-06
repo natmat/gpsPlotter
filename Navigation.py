@@ -1,7 +1,7 @@
+import copy
+import folium
 import re
 from GpsPoint import GpsPoint
-import folium
-import copy
 
 class Navigation():
     i_repeat = 0
@@ -11,8 +11,14 @@ class Navigation():
         self.gps_point = gps_point
         self.gps_previous = gps_previous
 
+    def usingGps(self):
+        # Using some GPS
+        return (self.gps_point.confidence == "high" and self.gps_point.confidence == "medium")
+
+    def isStopped(self):
+        return (float(self.gps_point.dist) < 1)
+
     def parseLine(self, line, header, i_marker_count):
-        # gps_line_re = re.compile(".*NavMan.*\((?P<confidence>.*?),(?P<lat>[^,]+),(?P<lon>[^,]+)")
         line_re = re.compile(".*Publishing NavigationMessage\("
                                  "(?P<lat>[^,]+),\s*(?P<lon>[^,]+),\s*(?P<dist>\d+),\s*"
                                  "(?P<confidence>[^,]+),\s*"
@@ -30,8 +36,7 @@ class Navigation():
                                       gps_d["gpsSpeed"])
 
             # Are we now in low speed (<1kph)?
-            if ((self.gps_point.confidence != "low" and self.gps_point.confidence != "error") and
-                (float(self.gps_point.dist) < 1.0 and float(self.gps_previous.dist) >= 1.0)):
+            if (self.usingGps() and self.isStopped()):
                 i_marker_count[0] += 1
                 folium.Circle([self.gps_previous.lat, self.gps_previous.lon],
                               radius=200,
