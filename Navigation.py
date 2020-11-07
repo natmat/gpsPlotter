@@ -5,7 +5,6 @@ import re
 from GpsPoint import GpsPoint
 from operator import itemgetter
 
-
 class Navigation():
     i_repeat = 0
 
@@ -17,6 +16,22 @@ class Navigation():
         self.gps_point = gps_point
         self.gps_previous = gps_previous
 
+    def usingGps(self):
+        # Using some GPS
+        return (self.gps_point.confidence == "high" and self.gps_point.confidence == "medium")
+
+    def isStopped(self):
+        return (float(self.gps_point.dist) < 1)
+
+    def parseLine(self, line, header, i_marker_count):
+        line_re = re.compile(".*Publishing NavigationMessage\("
+                                 "(?P<lat>[^,]+),\s*(?P<lon>[^,]+),\s*(?P<dist>\d+),\s*"
+                                 "(?P<confidence>[^,]+),\s*"
+                                 "(?P<gpsSpeed>[^\s]+)"
+                                 ".*")
+        match = line_re.search(line)
+        if match:
+            gps_d = match.groupdict()
 
     @classmethod
     def newNavigationMessage(cls, line):

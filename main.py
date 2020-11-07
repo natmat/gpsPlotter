@@ -47,7 +47,7 @@ nav_msg = Navigation()
 def draw_map():
     map_file = log_file_name + "." + str(i_map_count) + ".map.html"
     print("Writing to file {}".format(map_file))
-    navigation.gps_map.location = [52.617, 1.3144]  # [navigation.gps_point.lat, navigation.gps_point.lon]
+    # navigation.gps_map.location = [52.617, 1.3144]  # [navigation.gps_point.lat, navigation.gps_point.lon]
     navigation.gps_map.save(map_file)
     navigation.gps_map = folium.Map(location=[navigation.gps_point.lat, navigation.gps_point.lon], zoom_start=10)
 
@@ -62,7 +62,6 @@ for line in log_file:
     try:
         line = header.stripHeader(line)
     except:  # catch *all* exceptions
-        # print("Error: %s" % sys.exc_info()[0])
         continue
 
     if header.service == 'Navigation':
@@ -72,13 +71,18 @@ for line in log_file:
         continue
 
         navigation.parseLine(line, header, i_marker_count)
+    else:
+        print("Unknown service: {}".format(header.service))
+        continue
 
-    # Update the map
+    # Draw map every X markers
     if i_marker_count[0] > 500:
         i_marker_count[0] = 0
         draw_map()
         i_map_count += 1
 
-draw_map()
+# Draw remaining markers
+if i_map_count > 0:
+    draw_map()
 
 print("*** DONE ***")
