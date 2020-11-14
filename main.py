@@ -1,23 +1,22 @@
 from sys import exit
+import copy
 import tkinter as tk
 from tkinter import filedialog
-import copy
 from GpsPoint import GpsPoint
 import folium
 import sys
-from Navigation import Navigation
-
-from Navigation import Navigation
 from Header import Header
+from Mapping import Mapping
+from Navigation import Navigation
 
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "small.up"
-# log_file_name = filedialog.askopenfilename()
-# if not log_file_name:
-#     print("Error: must select an asdo.log file")
-#     exit(1)
+log_file_name = "tmp.down"
+log_file_name = filedialog.askopenfilename()
+if not log_file_name:
+    print("Error: must select an asdo.log file")
+    exit(1)
 print("Reading data from {}".format(log_file_name))
 
 # Create a basemap centred somewhere around East Anglia
@@ -31,23 +30,27 @@ log_file = open(log_file_name, 'r')
 
 gps_previous = GpsPoint('', 0, 0, 0, 0)
 gps_point = GpsPoint('', 0, 0, 0, 0)
+mapping = Mapping(log_file_name)
 
 # ip_addr = "10.177.156.21"
 ip_addr = "10.182.144.21"
 
-i_marker_count = [0]
-i_map_count = 1
+marker_count = [0]
+map_count = 1
 i_line = 0
 
 # navigation = Navigation(0, 0, 0, '', 0)
 # navigation.setGpsPoint(gps_map, gps_point, gps_previous)
-nav_msg_prev = Navigation()
+nav_msg_prev = None #Navigation()
 nav_msg = Navigation()
 
-def draw_map():
-    map_file = log_file_name + "." + str(i_map_count) + ".map.html"
+
+def drawMap():
+    map_file = log_file_name + "." + str(map_count) + ".map.html"
     print("Writing to file {}".format(map_file))
-    # navigation.gps_map.location = [52.617, 1.3144]  # [navigation.gps_point.lat, navigation.gps_point.lon]
+
+    mapping.save(map_file)
+
     navigation.gps_map.save(map_file)
     navigation.gps_map = folium.Map(location=[navigation.gps_point.lat, navigation.gps_point.lon], zoom_start=10)
 
@@ -65,24 +68,21 @@ for line in log_file:
         continue
 
     if header.service == 'Navigation':
-        nav_msg_prev = nav_msg
-        nav_mg = Navigation.newNavigationMessage(line)
-        print(nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed)
-        continue
-
-        navigation.parseLine(line, header, i_marker_count)
+        Navigation.newNavigationMessage(nav_msg, line)
+        # print(nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed)
     else:
-        print("Unknown service: {}".format(header.service))
+        # print("Unknown service: {}".format(header.service))
         continue
 
-    # Draw map every X markers
-    if i_marker_count[0] > 500:
-        i_marker_count[0] = 0
-        draw_map()
-        i_map_count += 1
+    mapping.plot_nav_msg(nav_msg_prev, nav_msg, header)
+    nav_msg_prev = copy.deepcopy(nav_msg)
+
+    if mapping.draw_map():
+        del mapping
+        mapping = Mapping(log_file_name)
+        nav_msg_prev = None
 
 # Draw remaining markers
-if i_map_count > 0:
-    draw_map()
+mapping.draw_map()
 
 print("*** DONE ***")

@@ -24,7 +24,7 @@ def main():
   test_line = " 2020/10/29 10:05:00.038423342 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 0, 0, 0, ERROR, 0 )"
   h = Header()
   line_without_header = h.stripHeader(test_line)
-  print(line_without_header)
+  # print(line_without_header)
 
 if __name__ == "__main__":
   # execute only if run as a script
