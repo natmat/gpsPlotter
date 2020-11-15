@@ -14,12 +14,15 @@ class Navigation:
         self.dist = self.gps_speed = 0
         self.confidence = 'ERROR'
 
+    def print_me(self):
+        print("NavMsg: [{},{}]:{},{},{}".format(self.lat, self.lon, self.confidence, self.gps_speed, self.dist))
+
     @property
-    def __str__(self):
-        return("[{},{}]:{},{},{}".format(self.lat, self.lon, self.confidence, self.gps_speed, self.dist))
+    def __repr__(self):
+        return ("[{},{}]:{},{},{}".format(self.lat, self.lon, self.confidence, self.gps_speed, self.dist))
 
     def get_gps(self):
-        return([self.lat, self.lon])
+        return [self.lat, self.lon]
 
     def set_gps_point(self, gps_map, gps_point, gps_previous):
         self.gps_map = gps_map

@@ -17,9 +17,6 @@ class Header():
     line_without_header = ' '.join([str(elem) for elem in line.split()[5:]])
     return(line_without_header)
 
-  def get_hours(self):
-    return(self.hours)
-
 def main():
   test_line = " 2020/10/29 10:05:00.038423342 10.177.156.21 AUD Navigation Navigation.cpp@325: Publishing NavigationMessage( 0, 0, 0, ERROR, 0 )"
   h = Header()
