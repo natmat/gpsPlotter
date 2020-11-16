@@ -42,8 +42,7 @@ nav_msg = Navigation()
 
 
 for line in log_file:
-    print(line)
-
+    # print(line)
     i_line += 1
 
     if not line.find(ip_addr) != 1:

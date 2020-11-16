@@ -12,7 +12,11 @@ class Mapping:
     def __init__(self, name):
         # Create a basemap centred somewhere around East Anglia
         self.map_name = name;
-        self.map = folium.Map(location=[52.617, 1.3144], zoom_start=9)
+        if Mapping.previous_nav_msg is None:
+            self.map = folium.Map(location=[52.617, 1.3144], zoom_start=9)
+        else:
+            self.map = folium.Map(location=Mapping.previous_nav_msg.get_gps(), zoom_start=9)
+
         self.marker_count = 0
         self.i_repeat = 0
 
@@ -40,19 +44,19 @@ class Mapping:
             Mapping.previous_nav_msg = copy.deepcopy(nav_msg)
 
     def plot_every_nth_confidence_marker(self, confidence_set, nav_msg, header):
-        print ("i={}".format(self.i_repeat))
         # Map only every Nth repeated point
         if (nav_msg.confidence in confidence_set and nav_msg.confidence == Mapping.previous_nav_msg.confidence):
             if not self.i_repeat % MAP_EVERY_NTH_POINT:
                 self.marker_count += 1
                 speed_radius = float(nav_msg.gps_speed) / 5
-                hours_mins = header.hours + ":" + header.minutes
+                hours_mins = '{}'.format(header.hours + ":" + header.minutes)
                 folium.CircleMarker(location=nav_msg.get_gps(),
                                     popup=hours_mins,  # nav_msg,
                                     color='green',
                                     radius=nav_msg.gps_speed,
-                                    tooltip=hours_mins + ":" + nav_msg.gps_speed,
-                                    fill=True).add_to(self.map)
+                                    tooltip=hours_mins,
+                                    fill=True).\
+                    add_to(self.map)
             self.i_repeat += 1
             return
 
@@ -66,8 +70,8 @@ class Mapping:
         elif nav_msg.confidence == 'low':
             draw_marker = False
             icon_colour = 'purple'
-            low_radius = int(nav_msg.dist) - int(Mapping.previous_nav_msg.dist)
             # Draw circles with increasing radius (of distance travelled)
+            low_radius = int(nav_msg.dist) - int(Mapping.previous_nav_msg.dist)
             self.marker_count += 1
             folium.Circle(Mapping.previous_nav_msg.get_gps(),
                           radius=low_radius,
@@ -97,9 +101,11 @@ class Mapping:
                 add_to(self.map)
 
         if draw_marker:
-            # print('draw_marker:', nav_msg.lat, nav_msg.lon)
+            print('draw_marker:', nav_msg.lat, nav_msg.lon)
+            if nav_msg.lat == '0':
+                return
             self.marker_count += 1
-            hours_mins = '{}'.format(header.hours + ":" + header.minutes)  # nav_msg)
+            hours_mins = '{}'.format(header.hours + ":" + header.minutes)
             folium.Marker(location=nav_msg.get_gps(),
                           popup=hours_mins,
                           icon=folium.Icon(icon_colour)). \
@@ -110,7 +116,7 @@ class Mapping:
 
     def plot_low_speed_circle(self, nav_msg):
         plotted = False
-        if not Mapping.previous_nav_msg:
+        if Mapping.previous_nav_msg is None:
             return
 
         if (float(Mapping.previous_nav_msg.dist) >= 1.0) and (float(nav_msg.dist) < 1.0):
@@ -141,8 +147,7 @@ class Mapping:
         self.map.location = Mapping.previous_nav_msg.get_gps()
         self.map.save(map_file)
         Mapping.map_count += 1
-        input("Press Enter to continue...")
+        # input("Press Enter to continue...")
 
         # Create new map
         del self.map
-        self.map = folium.Map(location=Mapping.previous_nav_msg.get_gps(), zoom_start=9)
