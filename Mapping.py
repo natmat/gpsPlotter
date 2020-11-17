@@ -1,7 +1,9 @@
 import copy
 import folium
+import sys
 
-MAP_EVERY_NTH_POINT = 5
+
+MAP_EVERY_NTH_POINT = 1
 
 
 class Mapping:
@@ -47,6 +49,7 @@ class Mapping:
         # Map only every Nth repeated point
         if (nav_msg.confidence in confidence_set and nav_msg.confidence == Mapping.previous_nav_msg.confidence):
             if not self.i_repeat % MAP_EVERY_NTH_POINT:
+                # nav_msg.print_me()
                 self.marker_count += 1
                 speed_radius = float(nav_msg.gps_speed) / 5
                 hours_mins = '{}'.format(header.hours + ":" + header.minutes)
@@ -68,6 +71,10 @@ class Mapping:
         elif nav_msg.confidence == 'medium':
             icon_colour = 'orange'
         elif nav_msg.confidence == 'low':
+            if not nav_msg.isValid():
+                print("ERR: low invalid")
+                return
+
             draw_marker = False
             icon_colour = 'purple'
             # Draw circles with increasing radius (of distance travelled)
@@ -83,6 +90,12 @@ class Mapping:
             # error (or other?)
             # Don't map consecutive errors
             if Mapping.previous_nav_msg.confidence == 'error':
+                return
+
+
+            # Only print valid points
+            if not Mapping.previous_nav_msg.isValid():
+                # print("previous lat/lon invalid")
                 return
 
             draw_marker = True
@@ -101,9 +114,11 @@ class Mapping:
                 add_to(self.map)
 
         if draw_marker:
-            print('draw_marker:', nav_msg.lat, nav_msg.lon)
-            if nav_msg.lat == '0':
+            if not nav_msg.isValid():
+                print("ERROR")
                 return
+
+            # print('draw_marker:', nav_msg.lat, nav_msg.lon)
             self.marker_count += 1
             hours_mins = '{}'.format(header.hours + ":" + header.minutes)
             folium.Marker(location=nav_msg.get_gps(),
@@ -148,6 +163,5 @@ class Mapping:
         self.map.save(map_file)
         Mapping.map_count += 1
         # input("Press Enter to continue...")
-
-        # Create new map
         del self.map
+        # sys.exit(1)

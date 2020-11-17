@@ -29,6 +29,9 @@ class Navigation:
         self.gps_point = gps_point
         self.gps_previous = gps_previous
 
+    def isValid(self):
+        return (self.lat != '0' and self.lon != '0')
+
     def usingGps(self):
         # Using some GPS
         return (self.gps_point.confidence == "high" and self.gps_point.confidence == "medium")

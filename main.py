@@ -40,7 +40,6 @@ i_line = 0
 # navigation.setGpsPoint(gps_map, gps_point, gps_previous)
 nav_msg = Navigation()
 
-
 for line in log_file:
     # print(line)
     i_line += 1
@@ -69,6 +68,6 @@ for line in log_file:
         nav_msg_prev = None
 
 # Draw remaining markers
-mapping.draw_map(header.hours)
+# mapping.draw_map(header.hours)
 
 print("*** DONE ***")
