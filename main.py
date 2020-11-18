@@ -12,7 +12,7 @@ from Navigation import Navigation
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "tmp.down"
+log_file_name = "small.down"
 # log_file_name = filedialog.askopenfilename()
 # if not log_file_name:
 #     print("Error: must select an asdo.log file")
@@ -68,6 +68,7 @@ for line in log_file:
         nav_msg_prev = None
 
 # Draw remaining markers
-# mapping.draw_map(header.hours)
+mapping.draw_map(header.hours)
+mapping.save_map_file()
 
 print("*** DONE ***")

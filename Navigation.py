@@ -24,6 +24,10 @@ class Navigation:
     def get_gps(self):
         return [self.lat, self.lon]
 
+    def set_gps(self, gps_copy):
+        self.lat = gps_copy.lat
+        self.lon = gps_copy.lon
+
     def set_gps_point(self, gps_map, gps_point, gps_previous):
         self.gps_map = gps_map
         self.gps_point = gps_point
