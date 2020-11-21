@@ -57,11 +57,11 @@ class Mapping:
     def plot_on_map(self, nav_msg, header):
         # Map only every Nth repeated point
         self.i_repeat += 1
-        print(self.i_repeat)
+        # print(self.i_repeat)
 
         if nav_msg.confidence == "high" and is_duplicate_conf(nav_msg):
             if not self.i_repeat % MAP_EVERY_NTH_POINT:
-                print('map Nth at ', nav_msg.get_gps())
+                # print('map Nth at ', nav_msg.get_gps())
                 self.marker_count += 1
                 hhmmss = '{}'.format(header.hours + ":" + header.minutes + ":" + header.seconds)
                 folium.Circle(location=nav_msg.get_gps(),
@@ -96,6 +96,9 @@ class Mapping:
         else:
             # error (or other?)
             # Don't map consecutive ERROR
+            if Mapping.previous_nav_msg is None:
+                return
+
             if Mapping.previous_nav_msg.confidence == 'error':
                 return
 
@@ -154,17 +157,16 @@ class Mapping:
         return plotted
 
     def draw_map(self, log_hours):
-        # print('draw_map ' + log_hours + ',' + Mapping.map_hours)
         if log_hours > Mapping.map_hours:
-            self.marker_count = 0
             self.save_map_file()
+            self.marker_count = 0
             Mapping.map_hours = log_hours
             return True
         return False
 
     def save_map_file(self):
         map_file = "{}.{:0>2d}hr.map.html".format(self.map_name, int(Mapping.map_hours))
-        print("Writing to file {}".format(map_file))
+        print("Writing {} markers to file {}".format(self.marker_count, map_file))
 
         # Re-centre map before saving
         self.map.location = Mapping.previous_nav_msg.get_gps()

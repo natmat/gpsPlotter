@@ -31,6 +31,7 @@ mapping = Mapping(log_file_name)
 
 # ip_addr = "10.177.156.21"
 ip_addr = "10.182.144.21"
+ip_addr = "10.181.72.21"
 
 marker_count = [0]
 map_count = 1
@@ -52,7 +53,7 @@ for line in log_file:
         line = header.stripHeader(line)
     except:  # catch *all* exceptions
         continue
-    print("{}: {}".format(i_line, line))
+    # print("{}: {}".format(i_line, line))
 
     if header.service == 'Navigation':
         Navigation.newNavigationMessage(nav_msg, line)
