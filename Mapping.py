@@ -153,7 +153,7 @@ class Mapping:
                           tooltip="speed:" + nav_msg.gps_speed). \
                 add_to(self.map)
             plotted = True
-            print("Low speed: " + nav_msg.gps_speed)
+            # print("Low speed: " + nav_msg.gps_speed)
         return plotted
 
     def draw_map(self, log_hours):
@@ -169,6 +169,11 @@ class Mapping:
         print("Writing {} markers to file {}".format(self.marker_count, map_file))
 
         # Re-centre map before saving
+        try:
+            self.map
+        except:
+            return
+
         self.map.location = Mapping.previous_nav_msg.get_gps()
         self.map.save(map_file)
         Mapping.map_count += 1
