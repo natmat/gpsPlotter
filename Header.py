@@ -9,6 +9,7 @@ class Header():
     self.date = split_line[0]
     self.hours = split_line[1].split(":")[0]
     self.minutes = split_line[1].split(":")[1]
+    self.seconds = str(round(float(split_line[1].split(":")[2]),2))
     self.ip_addr = split_line[2]
     self.adeiv = split_line[3]
     self.service = split_line[4]

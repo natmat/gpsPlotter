@@ -12,11 +12,11 @@ from Navigation import Navigation
 # Popup to select input station_data.sql file
 root = tk.Tk()
 root.withdraw()
-log_file_name = "small.down"
-# log_file_name = filedialog.askopenfilename()
-# if not log_file_name:
-#     print("Error: must select an asdo.log file")
-#     exit(1)
+# log_file_name = "small.down"
+log_file_name = filedialog.askopenfilename()
+if not log_file_name:
+    print("Error: must select an asdo.log file")
+    exit(1)
 print("Reading data from {}".format(log_file_name))
 
 # Open station_data.sql file for parsing
@@ -52,6 +52,7 @@ for line in log_file:
         line = header.stripHeader(line)
     except:  # catch *all* exceptions
         continue
+    print("{}: {}".format(i_line, line))
 
     if header.service == 'Navigation':
         Navigation.newNavigationMessage(nav_msg, line)
