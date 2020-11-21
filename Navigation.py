@@ -51,10 +51,6 @@ class Navigation:
 
     @classmethod
     def newNavigationMessage(cls, nav_msg, line):
-        if line.find("NavigationMessage") == -1:
-            # Not found
-            return None
-
         # Regex out the nav msg between '()' in the payload
         # ...NavigationMessage( 51.5219, -0.078844, 6144, MEDIUM, 8.365 )
         gps_data = re.sub(r'^.*\((.*)\).*', r'\1', line)
@@ -63,12 +59,10 @@ class Navigation:
 
         # Instantiate the NavMsg
         nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed \
-            = itemgetter(0, 1, 2, 3, 4, )(split_line)
+            = itemgetter(0, 1, 2, 3, 4)(split_line)
         nav_msg.confidence = nav_msg.confidence.lower()
 
         # Trial use of dict
         # dict_names = ['lat', 'lon', 'dist', 'confidence', 'gps_speed']
         # print(dict_names)
         # dict(zip(dict_names, split_line))
-
-        return

@@ -21,6 +21,7 @@ class Mapping:
     map_count = 1
     previous_nav_msg = None  # The previously mapped NavMsg
     map_hours = None
+    low_speed = False
     conf_colours = {
         'high': 'green',
         'medium': 'orange',
@@ -41,13 +42,11 @@ class Mapping:
         self.i_repeat = 0
 
     def plot_nav_msg(self, nav_msg, header):
-        # print(nav_msg.get_gps())
-
         if not Mapping.map_hours:
             Mapping.map_hours = header.hours
 
         # Are we now in low speed (<1kph)?
-        if self.plot_low_speed_circle(nav_msg):
+        if self.plot_low_speed_circle(nav_msg, header):
             return
 
         # Plot Nth 'high' conf points
@@ -135,7 +134,7 @@ class Mapping:
             # # save current to previous
             # self.deepcopy_nav_msg(nav_msg)
 
-    def plot_low_speed_circle(self, nav_msg):
+    def plot_low_speed_circle(self, nav_msg, header):
         if nav_msg.confidence in ['error', 'low']:
             return
 
@@ -143,21 +142,32 @@ class Mapping:
         if Mapping.previous_nav_msg is None:
             return
 
-        # If were moving, but are not now, then plot circle
-        if (float(Mapping.previous_nav_msg.dist) >= 1.0) and (float(nav_msg.dist) < 1.0):
+        # If are now low_speed, then plot Marker
+        if float(nav_msg.gps_speed) < 1:
+            if Mapping.low_speed:
+                return plotted
+        
+            Mapping.low_speed = True
             self.marker_count += 1
-            folium.Circle(nav_msg.get_gps(),
-                          radius=200,
-                          fill=False,
+            hhmmss = '{}'.format(header.hours + ":" + header.minutes + ":" + header.seconds)
+            folium.Marker(nav_msg.get_gps(),
                           color=self.conf_colours['lowspeed'],
-                          tooltip="speed:" + nav_msg.gps_speed). \
-                add_to(self.map)
+                          tooltip=hhmmss).\
+                      add_to(self.map)
             plotted = True
-            # print("Low speed: " + nav_msg.gps_speed)
+            self.i_repeat = -1
+        else:
+            Mapping.low_speed = False
+
         return plotted
 
     def draw_map(self, log_hours):
-        if log_hours > Mapping.map_hours:
+        save = False
+        if Mapping.map_hours is None:
+            Mapping.map_hours = log_hours
+            save = True
+
+        if save or log_hours > Mapping.map_hours:
             self.save_map_file()
             self.marker_count = 0
             Mapping.map_hours = log_hours

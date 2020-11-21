@@ -59,13 +59,10 @@ for line in log_file:
             ip_addr = header.ip_addr
 
     if header.service == 'Navigation':
-        if Navigation.newNavigationMessage(nav_msg, data) is None:
+        if line.find('NavigationMessage') == -1:
             continue
-        # print(nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed)
-    else:
-        # print("Unknown service: {}".format(header.service))
-        continue
 
+    Navigation.newNavigationMessage(nav_msg, data)
     mapping.plot_nav_msg(nav_msg, header)
 
     if mapping.draw_map(header.hours):
