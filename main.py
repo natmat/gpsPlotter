@@ -38,10 +38,7 @@ header = Header()
 nav_msg = Navigation()
 
 for line in log_file:
-    # print(line)
     i_line += 1
-    if not i_line % 100000:
-        print(i_line)
 
     if ip_addr is not None:
         if line.find(ip_addr) == -1:
@@ -50,9 +47,10 @@ for line in log_file:
     try:
         data = header.stripHeader(line)
     except:
-        print("ERROR: {}: {} ### {} ".format(i_line, line, data))
+        print("ERROR: {}\n\t >>> {}\n\t ### {} ".format(i_line, line, data))
         continue
 
+    # print(line)
     if ip_addr is None:
         answer = input("Filter on " + header.ip_addr + "? [y]")
         if answer[:1].lower() == 'y':
@@ -61,9 +59,8 @@ for line in log_file:
     if header.service == 'Navigation':
         if line.find('NavigationMessage') == -1:
             continue
-
-    Navigation.newNavigationMessage(nav_msg, data)
-    mapping.plot_nav_msg(nav_msg, header)
+        Navigation.newNavigationMessage(nav_msg, data)
+        mapping.plot_nav_msg(nav_msg, header)
 
     if mapping.draw_map(header.hours):
         del mapping

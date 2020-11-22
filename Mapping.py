@@ -42,11 +42,15 @@ class Mapping:
         self.i_repeat = 0
 
     def plot_nav_msg(self, nav_msg, header):
-        if not Mapping.map_hours:
+        if not Mapping.map_hours or Mapping.map_hours is None:
             Mapping.map_hours = header.hours
 
         # Are we now in low speed (<1kph)?
-        if self.plot_low_speed_circle(nav_msg, header):
+        try:
+            if self.plot_low_speed_circle(nav_msg, header):
+                return
+        except ValueError as e:
+            print(nav_msg.gps_speed)
             return
 
         # Plot Nth 'high' conf points
@@ -142,11 +146,11 @@ class Mapping:
         if Mapping.previous_nav_msg is None:
             return
 
-        # If are now low_speed, then plot Marker
+        # If we are now low_speed, then plot Marker
         if float(nav_msg.gps_speed) < 1:
             if Mapping.low_speed:
                 return plotted
-        
+
             Mapping.low_speed = True
             self.marker_count += 1
             hhmmss = '{}'.format(header.hours + ":" + header.minutes + ":" + header.seconds)
@@ -162,12 +166,10 @@ class Mapping:
         return plotted
 
     def draw_map(self, log_hours):
-        save = False
         if Mapping.map_hours is None:
-            Mapping.map_hours = log_hours
-            save = True
+            return
 
-        if save or log_hours > Mapping.map_hours:
+        if log_hours > Mapping.map_hours:
             self.save_map_file()
             self.marker_count = 0
             Mapping.map_hours = log_hours
@@ -175,18 +177,18 @@ class Mapping:
         return False
 
     def save_map_file(self):
+        if Mapping.map_hours is None:
+            Mapping.map_hours = 99
         map_file = "{}.{:0>2d}hr.map.html".format(self.map_name, int(Mapping.map_hours))
         print("Writing {} markers to file {}".format(self.marker_count, map_file))
 
         # Re-centre map before saving
         try:
-            self.map
-        except:
+            self.map.location = Mapping.previous_nav_msg.get_gps()
+            self.map.save(map_file)
+            Mapping.map_count += 1
+            del self.map
+        except ValueError as e:
+            print(e)
             return
 
-        self.map.location = Mapping.previous_nav_msg.get_gps()
-        self.map.save(map_file)
-        Mapping.map_count += 1
-        # input("Press Enter to continue...")
-        del self.map
-        # sys.exit(1)
