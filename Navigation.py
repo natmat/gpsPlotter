@@ -18,14 +18,15 @@ class Navigation:
         return "[{},{}]:{},{},{}".format(self.lat, self.lon, self.confidence, self.gps_speed, self.dist)
 
     def get_gps(self):
-        if self.lat.isnumeric() and self.lon.isnumeric():
-            return [self.lat, self.lon]
-        else:
-            return [0,0]
+        return [self.lat, self.lon]
 
     def set_gps(self, gps_copy):
-        self.lat = float(gps_copy.lat)
-        self.lon = float(gps_copy.lon)
+        try:
+            self.lat = float(gps_copy.lat)
+            self.lon = float(gps_copy.lon)
+        except ValueError as e:
+            print(e)
+            self.lat = self.lon = 0.0
 
     def set_gps_point(self, gps_map, gps_point, gps_previous):
         self.gps_map = gps_map
