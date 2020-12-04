@@ -21,8 +21,8 @@ class Navigation:
         return [self.lat, self.lon]
 
     def set_gps(self, gps_copy):
-        self.lat = gps_copy.lat
-        self.lon = gps_copy.lon
+        self.lat = float(gps_copy.lat)
+        self.lon = float(gps_copy.lon)
 
     def set_gps_point(self, gps_map, gps_point, gps_previous):
         self.gps_map = gps_map
@@ -30,7 +30,7 @@ class Navigation:
         self.gps_previous = gps_previous
 
     def isValid(self):
-        return (self.lat != '0' and self.lon != '0')
+        return (self.lat != 0 and self.lon != 0)
 
     def usingGps(self):
         # Using some GPS
