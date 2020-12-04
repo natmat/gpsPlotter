@@ -18,7 +18,10 @@ class Navigation:
         return "[{},{}]:{},{},{}".format(self.lat, self.lon, self.confidence, self.gps_speed, self.dist)
 
     def get_gps(self):
-        return [self.lat, self.lon]
+        if self.lat.isnumeric() and self.lon.isnumeric():
+            return [self.lat, self.lon]
+        else:
+            return [0,0]
 
     def set_gps(self, gps_copy):
         self.lat = float(gps_copy.lat)
@@ -58,9 +61,12 @@ class Navigation:
         # print(split_line)
 
         # Instantiate the NavMsg
-        nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed \
-            = itemgetter(0, 1, 2, 3, 4)(split_line)
-        nav_msg.confidence = nav_msg.confidence.lower()
+        try:
+            nav_msg.lat, nav_msg.lon, nav_msg.dist, nav_msg.confidence, nav_msg.gps_speed = itemgetter(0, 1, 2, 3, 4)(split_line)
+            nav_msg.confidence = nav_msg.confidence.lower()
+        except IndexError as e:
+            print(e)
+            return
 
         # Trial use of dict
         # dict_names = ['lat', 'lon', 'dist', 'confidence', 'gps_speed']
